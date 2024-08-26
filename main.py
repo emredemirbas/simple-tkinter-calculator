@@ -1,6 +1,6 @@
 import tkinter as tk
-from tkinter import ttk
-from evaluator import Evaluator
+from tkinter import ttk, messagebox
+from evaluator import *
 
 ev = Evaluator()
 
@@ -46,7 +46,6 @@ class InputFrame(ttk.Frame):
 
         self.add_numeric_buttons()
         self.add_operator_buttons()
-        self.add_trivial_buttons()
 
     def get_expression(self):
         return self.entry.get()
@@ -55,16 +54,19 @@ class InputFrame(ttk.Frame):
         return ev.evaluate_infix_expression(self.get_expression())
 
     def display_result(self, event=None):
-        expression = self.entry.get()
-        result = ev.evaluate_infix_expression(expression)
-        self.entry.delete(0, tk.END)
-        self.entry.insert(0, result)
-
-        self.master.right_frame.add_to_expression_list(f"{expression} = {result}")
+        try:
+            expression = self.entry.get()
+            result = ev.evaluate_infix_expression(expression)
+            self.entry.delete(0, tk.END)
+            self.entry.insert(0, result)
+            self.master.right_frame.add_to_expression_list(f"{expression} = {result}")
+        except ZeroDivisionError:
+            tk.messagebox.showinfo("", "You cannot divide a number by zero!")
+        except InvalidExpressionError as e:
+            tk.messagebox.showinfo("", e.message)
 
     def button_click(self, button_val):
         self.entry.insert(len(self.entry.get()), button_val)
-        # print(self.entry.get())
 
     def backspace(self):
         self.entry.delete(len(self.entry.get()) - 1)
@@ -102,7 +104,6 @@ class InputFrame(ttk.Frame):
                                                                                                     sticky="nsew")
             row_index += 1
 
-    def add_trivial_buttons(self):
         ttk.Button(self, text="⌫", command=self.backspace).grid(row=0, column=3, sticky="nsew")
         ttk.Button(self, text="NEG", command=self.negate).grid(row=4, column=0, sticky="nsew")
         ttk.Button(self, text=".", command=lambda: self.button_click(".")).grid(row=4, column=2, sticky="nsew")
@@ -117,7 +118,7 @@ class HistoryFrame(ttk.Frame):
 
         self.dummy_text = "There's no history yet"
 
-        self.label = ttk.Label(self, text="History")
+        self.label = ttk.Label(self, text="History", font=("Helvetica", 10))
         self.label.grid(row=0, column=0, sticky="w")
 
         self.delete_button = ttk.Button(self, text="🗑", command=self.clear_expression_list)
@@ -126,7 +127,7 @@ class HistoryFrame(ttk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
 
-        self.expression_list = tk.Listbox(self)
+        self.expression_list = tk.Listbox(self, font=("Helvetica", 10))
         self.expression_list.grid(row=1, column=0, sticky="nsew")
         self.expression_list.insert(0, self.dummy_text)
 
@@ -139,38 +140,6 @@ class HistoryFrame(ttk.Frame):
     def clear_expression_list(self):
         self.expression_list.delete(0, tk.END)
         self.expression_list.insert(0, "There's no history yet")
-
-
-# TEMPLATE
-class InputForm(ttk.Frame):
-    def __init__(self, parent):
-        super().__init__(parent)
-
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
-
-        self.entry = ttk.Entry(self)
-        self.entry.grid(row=0, column=0, sticky="ew")
-
-        self.entry.bind("<Return>", self.add_to_list)
-
-        self.entry_btn = ttk.Button(self, text="Add", command=self.add_to_list)
-        self.entry_btn.grid(row=0, column=1)
-
-        self.entry_btn2 = ttk.Button(self, text="Clear", command=self.clear_list)
-        self.entry_btn2.grid(row=0, column=2)
-
-        self.text_list = tk.Listbox(self)
-        self.text_list.grid(row=1, column=0, columnspan=3, sticky="nsew")
-
-    def add_to_list(self, event=None):
-        text = self.entry.get()
-        if text:
-            self.text_list.insert(tk.END, text)
-            self.entry.delete(0, tk.END)
-
-    def clear_list(self):
-        self.text_list.delete(0, tk.END)
 
 
 if __name__ == "__main__":

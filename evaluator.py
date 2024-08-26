@@ -4,8 +4,8 @@ operators = {"+", "-", "*", "/", "(", ")"}
 
 
 class Evaluator:
-
-    def is_expression_valid(self, expression):
+    @staticmethod
+    def is_expression_valid(expression):
         global operators
         stack = Stack()
         previous_char = None
@@ -22,7 +22,7 @@ class Evaluator:
                 if previous_char in operators and previous_char != "(" and char != "-":
                     # Invalid if two consecutive operators (unless it's a negative sign after an operator)
                     return False
-            elif not self.is_operand(char):
+            elif not Evaluator.is_operand(char):
                 # If the character is not a digit and not in the operator list
                 return False
 
@@ -31,7 +31,8 @@ class Evaluator:
         # Expression is invalid if there are unbalanced parentheses
         return stack.is_empty()
 
-    def add_spaces_to_expression(self, expression):
+    @staticmethod
+    def add_whitespaces_to_expression(expression):
         global operators
         result = ""
 
@@ -44,7 +45,7 @@ class Evaluator:
         return result
 
     def evaluate_infix_expression(self, expression):
-        if not self.is_expression_valid(expression):
+        if not Evaluator.is_expression_valid(expression):
             raise InvalidExpressionError()
 
         dummy_operator = "#"
@@ -53,7 +54,7 @@ class Evaluator:
 
         operator_stack.push(dummy_operator)
 
-        for symbol in self.add_spaces_to_expression(expression).split():
+        for symbol in self.add_whitespaces_to_expression(expression).split():
             if symbol == " ":
                 continue
 
@@ -118,7 +119,8 @@ class Evaluator:
     def is_operand(symbol):
         return not Evaluator.is_operator(symbol)
 
-    def get_operator_precedence(self, operator):
+    @staticmethod
+    def get_operator_precedence(operator):
         precedences = {
             "#": 0,
             "+": 1,
