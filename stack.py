@@ -14,10 +14,11 @@ class Stack:
     def pop(self):
         return self.elements.pop()
 
+    def peek(self):
+        return self.elements[-1]
+
     def display(self):
         print(self.elements)
 
     def remove_all_elements(self):
         self.elements = []
-        # while not self.is_empty():
-        #     self.pop()

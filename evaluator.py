@@ -43,9 +43,10 @@ class Evaluator:
 
         return result
 
+    # https://mathcenter.oxford.emory.edu/site/cs171/evaluatingFullyParenthesizedInfixExpressions/
     def evaluate_infix_expression(self, expression):
         if not self.is_expression_valid(expression):
-            raise Exception
+            raise Exception("Invalid Expression")
 
         dummy_operator = "#"
         operator_stack = Stack()
@@ -60,35 +61,36 @@ class Evaluator:
             if self.is_operand(symbol):
                 operand_stack.push(symbol)
 
+            elif symbol == "(":
+                operator_stack.push(symbol)
+
+            elif symbol == ")":
+                while operator_stack.peek() != "(":
+                    operand2 = operand_stack.pop()
+                    operand1 = operand_stack.pop()
+                    op = operator_stack.pop()
+                    operand_stack.push(self.calculate(operand1, operand2, op))
+                operator_stack.pop()
+
             elif self.is_operator(symbol):
-                popped_operator = operator_stack.pop()
+                while (operator_stack.peek() != dummy_operator and
+                       self.get_operator_precedence(symbol) <= self.get_operator_precedence(operator_stack.peek())):
+                    op = operator_stack.pop()
+                    if op == "(":
+                        operator_stack.push(op)
+                        break
+                    operand2 = operand_stack.pop()
+                    operand1 = operand_stack.pop()
+                    operand_stack.push(self.calculate(operand1, operand2, op))
+                operator_stack.push(symbol)
 
-                if self.get_operator_precedence(symbol) > self.get_operator_precedence(popped_operator):
-                    operator_stack.push(popped_operator)
-                    operator_stack.push(symbol)
-
-                else:
-                    while self.get_operator_precedence(symbol) <= self.get_operator_precedence(popped_operator):
-                        try:
-                            operand2 = operand_stack.pop()
-                            operand1 = operand_stack.pop()
-                            operand_stack.push(self.calculate(operand1, operand2, popped_operator))
-                            popped_operator = operator_stack.pop()
-                        except ZeroDivisionError:
-                            print("FIX HERE!!!!!!!!!!!!!!!!!!!!")
-                        operator_stack.push(popped_operator)
-                        operator_stack.push(symbol)
-
-        popped_operator = operator_stack.pop()
-
-        while popped_operator != dummy_operator:
-            try:
-                operand2 = operand_stack.pop()
-                operand1 = operand_stack.pop()
-                operand_stack.push(self.calculate(operand1, operand2, popped_operator))
-                popped_operator = operator_stack.pop()
-            except ZeroDivisionError:
-                print("FIX HERE 2!!!!!!!!!!!!!!!!!!!!")
+        while operator_stack.peek() != dummy_operator:
+            op = operator_stack.pop()
+            if op == "(":
+                break
+            operand2 = operand_stack.pop()
+            operand1 = operand_stack.pop()
+            operand_stack.push(self.calculate(operand1, operand2, op))
 
         return operand_stack.pop()
 
