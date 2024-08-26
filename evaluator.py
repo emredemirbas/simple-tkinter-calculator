@@ -4,8 +4,6 @@ operators = {"+", "-", "*", "/", "(", ")"}
 
 
 class Evaluator:
-    def __init__(self):
-        pass
 
     def is_expression_valid(self, expression):
         global operators
@@ -13,6 +11,8 @@ class Evaluator:
         previous_char = None
 
         for i, char in enumerate(expression):
+            if str(char).isalpha():
+                return False
             if char == "(":
                 stack.push(char)
             elif char == ")":
@@ -43,10 +43,9 @@ class Evaluator:
 
         return result
 
-    # https://mathcenter.oxford.emory.edu/site/cs171/evaluatingFullyParenthesizedInfixExpressions/
     def evaluate_infix_expression(self, expression):
         if not self.is_expression_valid(expression):
-            raise Exception("Invalid Expression")
+            raise InvalidExpressionError()
 
         dummy_operator = "#"
         operator_stack = Stack()
@@ -94,7 +93,8 @@ class Evaluator:
 
         return operand_stack.pop()
 
-    def calculate(self, operand1, operand2, operator):
+    @staticmethod
+    def calculate(operand1, operand2, operator):
         operand1 = float(operand1)
         operand2 = float(operand2)
         result = None
@@ -106,19 +106,18 @@ class Evaluator:
             case "*":
                 result = operand1 * operand2
             case "/":
-                if operand2 == 0:
-                    raise ZeroDivisionError
                 result = operand1 / operand2
         return int(result) if result.is_integer() else round(result, 2)
 
-    def is_operator(self, symbol):
+    @staticmethod
+    def is_operator(symbol):
         global operators
         return symbol in operators
 
-    def is_operand(self, symbol):
-        return not self.is_operator(symbol)
+    @staticmethod
+    def is_operand(symbol):
+        return not Evaluator.is_operator(symbol)
 
-    # Note to myself: this method throws KeyError if what you pass in is not an actual operator.
     def get_operator_precedence(self, operator):
         precedences = {
             "#": 0,
@@ -130,3 +129,9 @@ class Evaluator:
             ")": 3
         }
         return precedences[operator]
+
+
+class InvalidExpressionError(Exception):
+    def __init__(self, message="Expression that you entered is invalid!"):
+        self.message = message
+        super().__init__(self.message)
