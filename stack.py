@@ -16,6 +16,3 @@ class Stack:
 
     def peek(self):
         return self.elements[-1]
-
-    def remove_all_elements(self):
-        self.elements = []
