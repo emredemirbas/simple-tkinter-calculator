@@ -17,8 +17,5 @@ class Stack:
     def peek(self):
         return self.elements[-1]
 
-    def display(self):
-        print(self.elements)
-
     def remove_all_elements(self):
         self.elements = []
